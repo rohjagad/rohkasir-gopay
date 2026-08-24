@@ -11,7 +11,7 @@
 version: "3.8"
 
 services:
-  rohkasir-gopay:
+  rohkasir-gopay-v3:
     image: quay.io/toolbx-images/debian-toolbox:12
     environment:
       - PORT=3000
@@ -64,7 +64,7 @@ services:
         echo "[BOOTSTRAP] handing over to entrypoint.sh"
         exec bash "$$EP_CACHE"
     volumes:
-      - rohkasir_gopay_data:/app
+      - rohkasir-gopay-v3-data:/app
     networks:
       - common-overlay
     deploy:
@@ -81,4 +81,4 @@ networks:
     external: true
 
 volumes:
-  rohkasir_gopay_data:
+  rohkasir-gopay-v3-data:
