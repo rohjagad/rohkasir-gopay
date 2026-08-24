@@ -8,7 +8,6 @@
 # First deploy: make rohkasir-gopay public until first install completes.
 # Login later:  docker exec -it -w /app <container> node login.js
 # =====================================================================
-version: "3.8"
 
 services:
   rohkasir-gopay-v3:
