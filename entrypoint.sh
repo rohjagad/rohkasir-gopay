@@ -35,8 +35,9 @@ fi
 log "Using $(node -v) / npm v$(npm -v)"
 
 # ---------------------------------------------------------------------
-# 2. Install if missing, otherwise best-effort update
+# 2. Install / repair / update (idempotent & crash-safe against outages)
 # ---------------------------------------------------------------------
+# --- code: clone only when actually missing (partial states self-heal) ---
 if [ ! -f "$APP_DIR/server.js" ] || [ ! -f "$APP_DIR/package.json" ]; then
     log "Service not installed - cloning $REPO_URL ..."
 
@@ -60,11 +61,6 @@ if [ ! -f "$APP_DIR/server.js" ] || [ ! -f "$APP_DIR/package.json" ]; then
     rsync -a "$SRC"/ "$APP_DIR"/
     rm -rf "$SRC"
     log "Code ready."
-
-    log "Installing npm dependencies (--omit=dev) ..."
-    cd "$APP_DIR"
-    npm ci --omit=dev --no-audit --no-fund
-    log "Installation complete."
 else
     log "Service already installed - checking for updates ..."
     if timeout 25 git -C "$APP_DIR" pull --ff-only -q origin "$BRANCH" 2>/dev/null; then
@@ -72,6 +68,16 @@ else
     else
         log "WARN: repository unreachable (private?) - starting existing install."
     fi
+fi
+
+# --- deps: (re)install when lockfile changed OR previous run was cut off ---
+cd "$APP_DIR"
+DEP_STAMP="$(md5sum package.json package-lock.json 2>/dev/null | md5sum | cut -d' ' -f1)"
+if [ "$(cat "$APP_DIR/node_modules/.install_ok" 2>/dev/null)" != "$DEP_STAMP" ]; then
+    log "Installing npm dependencies (--omit=dev) ..."
+    npm ci --omit=dev --no-audit --no-fund
+    echo "$DEP_STAMP" >"$APP_DIR/node_modules/.install_ok"
+    log "Dependencies ready."
 fi
 
 # ---------------------------------------------------------------------
