@@ -63,8 +63,6 @@ services:
 
         echo "[BOOTSTRAP] handing over to entrypoint.sh"
         exec bash "$$EP_CACHE"
-    ports:
-      - "3000:3000"
     volumes:
       - rohkasir_gopay_data:/app
     networks:
