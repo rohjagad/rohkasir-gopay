@@ -617,7 +617,11 @@ async function verifyPayment(amount, startTime, merchantIdOverride = null, userA
         const txTimestamp = new Date(tx.transaction_time || tx.created_at || tx.settlement_time || 0).getTime();
         const txId = tx.id || tx.order_id || tx.wallstreet_transaction_id;
 
-        if (txAmount === targetAmount && txTimestamp >= filterStartTimeMs) {
+        // GoPay merchant API melaporkan nominal dalam satuan minor (x100).
+        // Contoh: pembayaran Rp1.300 tercatat sebagai 130000.
+        // Kita cocokkan pada skala minor agar pencocokan selalu akurat
+        // (dan tidak pernah keliru mengklaim nominal 100x lipat).
+        if (txAmount === targetAmount * 100 && txTimestamp >= filterStartTimeMs) {
             const existingClaim = claimedTransactions.get(txId);
 
             if (!existingClaim) {
@@ -627,7 +631,7 @@ async function verifyPayment(amount, startTime, merchantIdOverride = null, userA
                 return {
                     transaction_id: txId,
                     order_id: tx.order_id,
-                    amount: txAmount,
+                    amount: targetAmount,
                     payer_issuer: tx.qris_provider_aspi_issuer || 'GoPay / Bank',
                     payment_type: tx.payment_type || tx.transaction_source || 'GOPAY_INSTORE',
                     transaction_time: tx.transaction_time || tx.settlement_time
@@ -637,7 +641,7 @@ async function verifyPayment(amount, startTime, merchantIdOverride = null, userA
                 return {
                     transaction_id: txId,
                     order_id: tx.order_id,
-                    amount: txAmount,
+                    amount: targetAmount,
                     payer_issuer: tx.qris_provider_aspi_issuer || 'GoPay / Bank',
                     payment_type: tx.payment_type || tx.transaction_source || 'GOPAY_INSTORE',
                     transaction_time: tx.transaction_time || tx.settlement_time
