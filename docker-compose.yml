@@ -1,13 +1,74 @@
-version: '3.8'
+# =====================================================================
+# RohKasir GoPay Gateway - Docker Compose (VPS / local)
+#
+# Bootstrap only: downloads entrypoint.sh from the repo into the named
+# volume, falls back to the cached copy when the repo is unreachable,
+# then hands over all install/start logic to it.
+#
+# First deploy: make rohkasir-gopay public until first install completes.
+# Login later:  docker compose exec -w /app rohkasir-gopay-v3 node login.js
+# API key:      docker compose exec rohkasir-gopay-v3 cat /app/.api_key
+# =====================================================================
 
 services:
-  gopay-gateway:
-    build: .
-    container_name: gopay-gateway
-    restart: always
+  rohkasir-gopay-v3:
+    image: quay.io/toolbx-images/debian-toolbox:12
+    container_name: rohkasir-gopay-v3
+    restart: unless-stopped
     ports:
       - "3000:3000"
-    env_file:
-      - .env
     environment:
       - PORT=3000
+      - REPO_URL=https://github.com/rohjagad/rohkasir-gopay.git
+      - ENTRYPOINT_URL=https://raw.githubusercontent.com/rohjagad/rohkasir-gopay/main/entrypoint.sh
+      # optional PAT, only needed if you skip making the repo public
+      - GIT_TOKEN=
+    entrypoint:
+      - /bin/bash
+      - -c
+      - |
+        set -u
+        export DEBIAN_FRONTEND=noninteractive GIT_TERMINAL_PROMPT=0
+        EP_CACHE=/app/.docker-entrypoint.sh
+
+        mkdir -p /app
+
+        fetch_ep() {
+          if command -v curl >/dev/null 2>&1; then
+            curl -fsSL --connect-timeout 10 --max-time 30 "$$ENTRYPOINT_URL" -o "$$1"
+          else
+            wget -q --timeout=20 --tries=1 -O "$$1" "$$ENTRYPOINT_URL"
+          fi
+        }
+
+        if [ -s "$$EP_CACHE" ]; then
+          if fetch_ep "$${EP_CACHE}.new" && [ -s "$${EP_CACHE}.new" ]; then
+            mv "$${EP_CACHE}.new" "$$EP_CACHE"
+            echo "[BOOTSTRAP] entrypoint.sh refreshed from repo"
+          else
+            rm -f "$${EP_CACHE}.new"
+            echo "[BOOTSTRAP][WARN] repo unreachable - using cached entrypoint.sh"
+          fi
+        else
+          echo "[BOOTSTRAP] downloading entrypoint.sh ..."
+          n=0
+          until fetch_ep "$$EP_CACHE" && [ -s "$$EP_CACHE" ]; do
+            rm -f "$$EP_CACHE"
+            n=$$((n + 1))
+            if [ $$n -ge 10 ]; then
+              echo "[BOOTSTRAP][ERROR] cannot reach repo after $$n attempts - exiting (compose will restart)"
+              exit 1
+            fi
+            echo "[BOOTSTRAP] attempt $$n/10 failed - retrying in 30s ..."
+            sleep 30
+          done
+          echo "[BOOTSTRAP] entrypoint.sh downloaded"
+        fi
+
+        echo "[BOOTSTRAP] handing over to entrypoint.sh"
+        exec bash "$$EP_CACHE"
+    volumes:
+      - rohkasir-gopay-v3-data:/app
+
+volumes:
+  rohkasir-gopay-v3-data:

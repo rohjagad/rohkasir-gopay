@@ -162,16 +162,27 @@ PM2 adalah Process Manager untuk Node.js agar server otomatis hidup kembali jika
 ---
 
 #### 🐳 Metode B: Deploy Menggunakan Docker & Docker Compose
-Jika VPS kamu sudah terinstall Docker:
+Jika VPS kamu sudah terinstall Docker, `docker-compose.yml` sudah self-contained — container akan otomatis clone repo, install dependencies, dan membuat API key unik:
 
-1. **Pastikan file `.env` dan `.GOPAY_SESI_JANGAN_DIHAPUS.json` sudah ada.**
-2. **Jalankan container di background:**
+1. **Jalankan container di background:**
    ```bash
    docker compose up -d
    ```
-3. **Cek status & log container:**
+2. **Cek log untuk melihat API key yang di-generate:**
    ```bash
    docker compose logs -f
+   ```
+   API key juga bisa dilihat kapan saja dengan:
+   ```bash
+   docker compose exec rohkasir-gopay-v3 cat /app/.api_key
+   ```
+3. **Login OTP GoPay (sekali saja):**
+   ```bash
+   docker compose exec -w /app rohkasir-gopay-v3 node login.js
+   ```
+4. **Restart container agar sesi login dipakai:**
+   ```bash
+   docker compose restart
    ```
 
 ---
