@@ -12,7 +12,7 @@
 
 services:
   rohkasir-gopay-v3:
-    image: quay.io/toolbx-images/debian-toolbox:12
+    image: debian:12
     container_name: rohkasir-gopay-v3
     restart: unless-stopped
     ports:
@@ -32,6 +32,12 @@ services:
         EP_CACHE=/app/.docker-entrypoint.sh
 
         mkdir -p /app
+
+        if ! command -v curl >/dev/null 2>&1 && ! command -v wget >/dev/null 2>&1; then
+          echo "[BOOTSTRAP] installing curl ..."
+          apt-get update -qq
+          apt-get install -y -qq ca-certificates curl >/dev/null
+        fi
 
         fetch_ep() {
           if command -v curl >/dev/null 2>&1; then

@@ -27,10 +27,11 @@ log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*"; }
 # 1. Runtime dependencies (container filesystem is ephemeral)
 #    Debian 12 repos provide Node.js 18.x (the recommended version).
 # ---------------------------------------------------------------------
-if ! command -v node >/dev/null 2>&1 || ! command -v npm >/dev/null 2>&1; then
-    log "Installing nodejs + npm + ca-certificates ..."
+if ! command -v node >/dev/null 2>&1 || ! command -v npm >/dev/null 2>&1 \
+   || ! command -v git >/dev/null 2>&1 || ! command -v rsync >/dev/null 2>&1; then
+    log "Installing git + rsync + nodejs + npm + ca-certificates ..."
     apt-get update -qq
-    apt-get install -y -qq ca-certificates nodejs npm >/dev/null
+    apt-get install -y -qq ca-certificates git rsync nodejs npm >/dev/null
 fi
 log "Using $(node -v) / npm v$(npm -v)"
 
