@@ -185,6 +185,8 @@ Jika VPS kamu sudah terinstall Docker, `docker-compose.yml` sudah self-contained
    docker compose restart
    ```
 
+> 💾 **Penyimpanan data:** seluruh data gateway (clone repo, `node_modules`, `.env`, `.api_key`, dan file sesi GoPay) disimpan di folder `./data` tepat di samping `docker-compose.yml`. Backup folder ini untuk memindahkan atau memulihkan gateway. `docker compose down -v` tidak akan menghapus data di folder ini.
+
 ---
 
 ### 🔒 (Opsional) Langkah 4: Setup Nginx Reverse Proxy & SSL HTTPS

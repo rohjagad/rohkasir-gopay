@@ -1,4 +1,5 @@
 node_modules/
+data/
 .gopay_cache.json
 .GOPAY_SESI_JANGAN_DIHAPUS.json
 .api_key

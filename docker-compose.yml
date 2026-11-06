@@ -1,9 +1,9 @@
 # =====================================================================
 # RohKasir GoPay Gateway - Docker Compose (VPS / local)
 #
-# Bootstrap only: downloads entrypoint.sh from the repo into the named
-# volume, falls back to the cached copy when the repo is unreachable,
-# then hands over all install/start logic to it.
+# Bootstrap only: downloads entrypoint.sh from the repo into the
+# bind-mounted ./data folder, falls back to the cached copy when the
+# repo is unreachable, then hands over all install/start logic to it.
 #
 # First deploy: make rohkasir-gopay public until first install completes.
 # Login later:  docker compose exec -w /app rohkasir-gopay-v3 node login.js
@@ -74,7 +74,4 @@ services:
         echo "[BOOTSTRAP] handing over to entrypoint.sh"
         exec bash "$$EP_CACHE"
     volumes:
-      - rohkasir-gopay-v3-data:/app
-
-volumes:
-  rohkasir-gopay-v3-data:
+      - ./data:/app
