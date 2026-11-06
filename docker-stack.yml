@@ -14,8 +14,8 @@ services:
     image: quay.io/toolbx-images/debian-toolbox:12
     environment:
       - PORT=3000
-      - REPO_URL=https://github.com/rohcuan/rohkasir-gopay.git
-      - ENTRYPOINT_URL=https://raw.githubusercontent.com/rohcuan/rohkasir-gopay/main/entrypoint.sh
+      - REPO_URL=https://github.com/rohjagad/rohkasir-gopay.git
+      - ENTRYPOINT_URL=https://raw.githubusercontent.com/rohjagad/rohkasir-gopay/main/entrypoint.sh
       # optional PAT, only needed if you skip making the repo public
       - GIT_TOKEN=
     entrypoint:

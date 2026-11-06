@@ -17,7 +17,7 @@ export DEBIAN_FRONTEND=noninteractive
 export GIT_TERMINAL_PROMPT=0
 
 APP_DIR="/app"
-REPO_URL="${REPO_URL:-https://github.com/rohcuan/rohkasir-gopay.git}"
+REPO_URL="${REPO_URL:-https://github.com/rohjagad/rohkasir-gopay.git}"
 GIT_TOKEN="${GIT_TOKEN:-}"
 BRANCH="main"
 
